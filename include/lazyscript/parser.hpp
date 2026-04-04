@@ -3,6 +3,8 @@
 #include <vector>
 #include <format>
 #include <memory>
+#include <string>
+#include "debugger.hpp"
 
 #include "lazyscript/ast.hpp"
 #include "lazyscript/lexer.hpp"

@@ -55,7 +55,16 @@ DeclarationPtr Parser::parseDeclaration()
 		}
 
 		expect(TokenKind::LBRACE);
-		expect(TokenKind::RBRACE);
+
+		TRACE(std::format("DECLARATION: Function {}, with number of args {} ", name, args.size()));
+		TRACE("Function Expression logs: ");
+
+		while (!maybe(TokenKind::RBRACE))
+		{
+			body.push_back(std::move(parseStatement()));
+		}
+
+		TRACE(std::format("Function Size: {} ", body.size()));
 
 		return std::make_unique<FunctionDeclaration>(std::move(name), std::move(args), std::move(body));
 	}
@@ -67,15 +76,36 @@ DeclarationPtr Parser::parseDeclaration()
 	}
 }
 
-StatementPtr Parser::parseStatement(){
-	return std::make_unique<ExpressionStmt>(std::move(parseExpression()));
+StatementPtr Parser::parseStatement()
+{
+	ExpressionPtr expr = parseExpression();
+	maybe(TokenKind::SEMICOLON);
+	return std::make_unique<ExpressionStmt>(std::move(expr));
 }
 
-ExpressionPtr Parser::parseExpression(){
-	return parsePrimitive();
+ExpressionPtr Parser::parseExpression()
+{
+	return std::move(parsePrimitive());
 }
 
-ExpressionPtr Parser::parsePrimitive(){}
+ExpressionPtr Parser::parsePrimitive()
+{
+	Token tok = advance();
+
+	if (tok.kind == TokenKind::INTEGER_LITERAL)
+	{
+		TRACE("EXPRESSION: Integer literal " + tok.value);
+		return std::make_unique<IntExpression>(std::stoi(std::move(tok.value)));
+	}
+	else if (tok.kind == TokenKind::FLOAT_LITERAL)
+	{
+		TRACE("EXPRESSION: Float literal " + tok.value);
+		return std::make_unique<FloatExpression>(std::stof(std::move(tok.value)));
+	}
+
+	unexpected(tok);
+	return NULL;
+}
 
 Token Parser::peek()
 {

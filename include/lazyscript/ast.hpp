@@ -140,14 +140,14 @@ struct IntExpression : Expression
 {
     int num;
 
-    IntExpression(int n) : num(n) {}
+    IntExpression(int n) : num(std::move(n)) {}
 };
 
 struct FloatExpression : Expression
 {
     float num;
 
-    FloatExpression(float n) : num(n) {}
+    FloatExpression(float n) : num(std::move(n)) {}
 };
 
 struct StringExpression : Expression

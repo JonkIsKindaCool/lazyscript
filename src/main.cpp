@@ -29,6 +29,7 @@ void compile_project(nlohmann::json data)
     try
     {
         Parser parser(read_file(main), entry);
+        parser.parse();
     } catch (std::runtime_error err){
         std::cout << err.what() << std::endl;
         exit(1);
