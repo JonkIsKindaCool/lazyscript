@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <iostream>
+#include "lazyscript/lexer.hpp"
 
 struct Declaration
 {
@@ -18,32 +19,65 @@ using StatementPtr = std::unique_ptr<Statement>;
 
 struct Expression
 {
+    Span span;
     virtual ~Expression() = default;
 };
 
 using ExpressionPtr = std::unique_ptr<Expression>;
 
+struct VariableType
+{
+    std::string name;
+    std::vector<std::unique_ptr<VariableType>> generics;
+
+    VariableType(std::string name, std::vector<std::unique_ptr<VariableType>> generics) : name(std::move(name)), generics(std::move(generics)) {}
+};
+
+using VariableTypePtr = std::unique_ptr<VariableType>;
+
+struct FunctionArgument
+{
+    std::string name;
+    VariableTypePtr type;
+    bool optional;
+
+    FunctionArgument(std::string name, VariableTypePtr type, bool optional) : name(std::move(name)), type(std::move(type)), optional(optional) {}
+};
+
+using FunctionArgumentPtr = std::unique_ptr<FunctionArgument>;
+
 /*
     Declarations
  */
+
 struct FunctionDeclaration : Declaration
 {
     std::string name;
+    std::vector<FunctionArgumentPtr> args;
+    std::vector<StatementPtr> body;
 
-    FunctionDeclaration(std::string n) : name(std::move(n)) {}
+    FunctionDeclaration(std::string n, std::vector<FunctionArgumentPtr> args, std::vector<StatementPtr> body) : name(std::move(n)), args(std::move(args)), body(std::move(body)) {}
 };
 
 /*
     Statements
 */
 
-struct VarStatement : Statement
+struct VarStmt : Statement
 {
     std::string name;
     ExpressionPtr expr;
 
-    VarStatement(std::string s, ExpressionPtr val) : name(std::move(s)), expr(std::move(val)) {}
+    VarStmt(std::string s, ExpressionPtr val) : name(std::move(s)), expr(std::move(val)) {}
 };
+
+struct ExpressionStmt : Statement
+{
+    ExpressionPtr expr;
+
+    ExpressionStmt(ExpressionPtr expr) : expr(std::move(expr)) {}
+};
+
 
 /*
     Operators
@@ -136,5 +170,5 @@ struct BinaryOp : Expression
     ExpressionPtr left;
     ExpressionPtr right;
 
-    BinaryOp(BinaryOpType o, ExpressionPtr l, ExpressionPtr r) : op(o), left(std::move(l)), right(std::move(r))  {}
+    BinaryOp(BinaryOpType o, ExpressionPtr l, ExpressionPtr r) : op(o), left(std::move(l)), right(std::move(r)) {}
 };

@@ -101,7 +101,6 @@ struct Token
 class Lexer
 {
 private:
-    std::string src;
     std::string name;
 
     int rawPos;
@@ -128,6 +127,8 @@ private:
     Token lexToken();
 
 public:
+    std::string src;
+
     Lexer(std::string src, std::string name);
     ~Lexer();
 

@@ -26,14 +26,13 @@ void compile_project(nlohmann::json data)
     std::string source_path = fs::current_path().string().append("/").append(source.c_str());
     std::string main = fs::current_path().string().append("/").append(source.c_str()).append("/").append(entry.c_str());
 
-    Lexer lex(read_file(main), entry);
-    
-    while (!lex.maybe(EOF_TOKEN))
+    try
     {
-        Token tok = lex.next();
-        std::cout << "Kind: " << tok.kind << " | Value: " << tok.value << std::endl;
+        Parser parser(read_file(main), entry);
+    } catch (std::runtime_error err){
+        std::cout << err.what() << std::endl;
+        exit(1);
     }
-    
 }
 
 nlohmann::json get_config_file()
