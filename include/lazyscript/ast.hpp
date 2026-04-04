@@ -4,11 +4,27 @@
 #include <iostream>
 #include "lazyscript/lexer.hpp"
 
+enum class DeclarationKind{
+    FUNCTION,
+    CLASS,
+    STRUCT,
+    ENUM,
+    TYPE,
+};
+
 struct Declaration
 {
     virtual ~Declaration() = default;
 };
 using DeclarationPtr = std::unique_ptr<Declaration>;
+
+enum class StatementKind{
+    IF,
+    FUNCTION,
+    WHILE,
+    FOR,
+    EXPRESSION
+};
 
 struct Statement
 {
@@ -17,9 +33,21 @@ struct Statement
 
 using StatementPtr = std::unique_ptr<Statement>;
 
+enum class ExpressionKind{
+    INTEGER,
+    FLOAT,
+    STRING,
+    IDENT,
+    BINOP,
+    UNOP,
+    CALL,
+    FIELD
+};
+
 struct Expression
 {
     Span span;
+    ExpressionKind kind;
     virtual ~Expression() = default;
 };
 
@@ -105,11 +133,6 @@ enum class BinaryOpType
     BitwiseXor, // ^
     LeftShift,  // <<
     RightShift, // >>
-
-    AddAssign, // +=
-    SubAssign, // -=
-    MulAssign, // *=
-    DivAssign, // /=
 };
 
 enum class UnaryOpType
@@ -140,28 +163,40 @@ struct IntExpression : Expression
 {
     int num;
 
-    IntExpression(int n) : num(std::move(n)) {}
+    IntExpression(Span span, int n) : num(std::move(n)) {
+        span = std::move(span);
+        kind = ExpressionKind::INTEGER;
+    }
 };
 
 struct FloatExpression : Expression
 {
     float num;
 
-    FloatExpression(float n) : num(std::move(n)) {}
+    FloatExpression(Span span, float n) : num(std::move(n)) {
+        span = std::move(span);
+        kind = ExpressionKind::FLOAT;
+    }
 };
 
 struct StringExpression : Expression
 {
     std::string val;
 
-    StringExpression(std::string s) : val(std::move(s)) {}
+    StringExpression(Span span, std::string s) : val(std::move(s)) {
+        span = std::move(span);
+        kind = ExpressionKind::STRING;
+    }
 };
 
 struct IdentifierLiteral : Expression
 {
     std::string name;
 
-    IdentifierLiteral(std::string s) : name(std::move(s)) {}
+    IdentifierLiteral(Span span, std::string s) : name(std::move(s)) {
+        span = std::move(span);
+        kind = ExpressionKind::IDENT;
+    }
 };
 
 struct BinaryOp : Expression
@@ -170,5 +205,20 @@ struct BinaryOp : Expression
     ExpressionPtr left;
     ExpressionPtr right;
 
-    BinaryOp(BinaryOpType o, ExpressionPtr l, ExpressionPtr r) : op(o), left(std::move(l)), right(std::move(r)) {}
+    BinaryOp(Span span, BinaryOpType o, ExpressionPtr l, ExpressionPtr r) : op(o), left(std::move(l)), right(std::move(r)) {
+        span = std::move(span);
+        kind = ExpressionKind::BINOP;
+    }
+};
+
+struct AssignmentOp : Expression
+{
+    AssignmentOpType op;
+    ExpressionPtr left;
+    ExpressionPtr right;
+
+    AssignmentOp(Span span, AssignmentOpType o, ExpressionPtr l, ExpressionPtr r) : op(o), left(std::move(l)), right(std::move(r)) {
+        span = std::move(span);
+        kind = ExpressionKind::BINOP;
+    }
 };

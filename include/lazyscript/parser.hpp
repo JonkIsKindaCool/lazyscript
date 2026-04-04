@@ -27,6 +27,18 @@ private:
     StatementPtr parseStatement();
 
     ExpressionPtr parseExpression();
+
+    ExpressionPtr parseAssignment();
+    ExpressionPtr parseOR();
+    ExpressionPtr parseAND();
+    ExpressionPtr parseBitwise_OR();
+    ExpressionPtr parseBitwise_XOR();
+    ExpressionPtr parseBitwise_AND();
+    ExpressionPtr parseEquality();
+    ExpressionPtr parseComparison();
+    ExpressionPtr parseShift();
+    ExpressionPtr parseAdditive();
+    ExpressionPtr parseMultiplicative();
     
     ExpressionPtr parsePrimitive();
 

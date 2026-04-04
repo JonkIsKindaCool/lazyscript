@@ -19,15 +19,6 @@ enum class TokenKind
     RETURN,
     STRUCT,
 
-    I32,
-    I64,
-    F32,
-    F64,
-    BOOL,
-    CHAR,
-    STRING,
-    PTR,
-
     TRUE,
     FALSE,
     NULL_LITERAL,

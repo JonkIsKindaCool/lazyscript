@@ -19,15 +19,6 @@ constexpr std::string_view token_to_string(TokenKind kind) noexcept
         case TokenKind::RETURN:         return "RETURN";
         case TokenKind::STRUCT:         return "STRUCT";
 
-        case TokenKind::I32:            return "I32";
-        case TokenKind::I64:            return "I64";
-        case TokenKind::F32:            return "F32";
-        case TokenKind::F64:            return "F64";
-        case TokenKind::BOOL:           return "BOOL";
-        case TokenKind::CHAR:           return "CHAR";
-        case TokenKind::STRING:         return "STRING";
-        case TokenKind::PTR:            return "PTR";
-
         case TokenKind::TRUE:           return "TRUE";
         case TokenKind::FALSE:          return "FALSE";
         case TokenKind::NULL_LITERAL:   return "NULL";

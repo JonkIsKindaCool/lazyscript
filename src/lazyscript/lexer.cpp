@@ -1,16 +1,16 @@
 #include "lazyscript/lexer.hpp"
 
 static std::unordered_map<std::string, TokenKind> keywords = {
-    {"func", TokenKind::FUNC}, {"let", TokenKind::LET}, {"const", TokenKind::CONST}, {"if", TokenKind::IF}, {"else", TokenKind::ELSE}, {"while", TokenKind::WHILE}, {"for", TokenKind::FOR}, {"in", TokenKind::IN}, {"return", TokenKind::RETURN}, {"struct", TokenKind::STRUCT},
-
-    {"i32", TokenKind::I32},
-    {"i64", TokenKind::I64},
-    {"f32", TokenKind::F32},
-    {"f64", TokenKind::F64},
-    {"bool", TokenKind::BOOL},
-    {"char", TokenKind::CHAR},
-    {"string", TokenKind::STRING},
-    {"ptr", TokenKind::PTR},
+    {"func", TokenKind::FUNC}, 
+    {"let", TokenKind::LET}, 
+    {"const", TokenKind::CONST}, 
+    {"if", TokenKind::IF}, 
+    {"else", TokenKind::ELSE}, 
+    {"while", TokenKind::WHILE}, 
+    {"for", TokenKind::FOR}, 
+    {"in", TokenKind::IN}, 
+    {"return", TokenKind::RETURN}, 
+    {"struct", TokenKind::STRUCT},
 
     {"true", TokenKind::TRUE},
     {"false", TokenKind::FALSE},
