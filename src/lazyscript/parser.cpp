@@ -439,16 +439,31 @@ ExpressionPtr Parser::parsePrimitive()
 	else if (tok.kind == TokenKind::STRING_LITERAL)
 	{
 		TRACE("EXPRESSION: String literal " + tok.value);
-		return std::make_unique<StringExpression>(std::move(tok.span), std::move(tok.value));
+		return std::move(parsePostfix(std::make_unique<StringExpression>(std::move(tok.span), std::move(tok.value))));
 	}
 	else if (tok.kind == TokenKind::IDENTIFIER)
 	{
 		TRACE("EXPRESSION: Identifier literal " + tok.value);
-		return std::make_unique<IdentifierLiteral>(std::move(tok.span), std::move(tok.value));
+		return std::move(parsePostfix(std::make_unique<IdentifierLiteral>(std::move(tok.span), std::move(tok.value))));
 	}
 
 	unexpected(tok);
 	return NULL;
+}
+
+ExpressionPtr Parser::parsePostfix(ExpressionPtr expr){
+	Token tok = peek();
+
+	if (tok.kind == TokenKind::DOT){
+		advance();
+		std::string field = get_ident();
+
+		TRACE("Got field: " + field);
+
+		return std::move(parsePostfix(std::make_unique<FieldExpr>(tok.span, std::move(expr), std::move(field))));
+	}
+
+	return expr;
 }
 
 Token Parser::peek()

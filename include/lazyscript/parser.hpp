@@ -42,6 +42,8 @@ private:
     
     ExpressionPtr parsePrimitive();
 
+    ExpressionPtr parsePostfix(ExpressionPtr expr);
+
     void unexpected(Token t);
     void expect(TokenKind t);
     bool maybe(TokenKind t);

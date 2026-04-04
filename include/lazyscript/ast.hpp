@@ -4,7 +4,8 @@
 #include <iostream>
 #include "lazyscript/lexer.hpp"
 
-enum class DeclarationKind{
+enum class DeclarationKind
+{
     FUNCTION,
     CLASS,
     STRUCT,
@@ -18,7 +19,8 @@ struct Declaration
 };
 using DeclarationPtr = std::unique_ptr<Declaration>;
 
-enum class StatementKind{
+enum class StatementKind
+{
     IF,
     FUNCTION,
     WHILE,
@@ -33,7 +35,8 @@ struct Statement
 
 using StatementPtr = std::unique_ptr<Statement>;
 
-enum class ExpressionKind{
+enum class ExpressionKind
+{
     INTEGER,
     FLOAT,
     STRING,
@@ -106,7 +109,6 @@ struct ExpressionStmt : Statement
     ExpressionStmt(ExpressionPtr expr) : expr(std::move(expr)) {}
 };
 
-
 /*
     Operators
 */
@@ -163,7 +165,8 @@ struct IntExpression : Expression
 {
     int num;
 
-    IntExpression(Span span, int n) : num(std::move(n)) {
+    IntExpression(Span span, int n) : num(std::move(n))
+    {
         span = std::move(span);
         kind = ExpressionKind::INTEGER;
     }
@@ -173,7 +176,8 @@ struct FloatExpression : Expression
 {
     float num;
 
-    FloatExpression(Span span, float n) : num(std::move(n)) {
+    FloatExpression(Span span, float n) : num(std::move(n))
+    {
         span = std::move(span);
         kind = ExpressionKind::FLOAT;
     }
@@ -183,7 +187,8 @@ struct StringExpression : Expression
 {
     std::string val;
 
-    StringExpression(Span span, std::string s) : val(std::move(s)) {
+    StringExpression(Span span, std::string s) : val(std::move(s))
+    {
         span = std::move(span);
         kind = ExpressionKind::STRING;
     }
@@ -193,7 +198,8 @@ struct IdentifierLiteral : Expression
 {
     std::string name;
 
-    IdentifierLiteral(Span span, std::string s) : name(std::move(s)) {
+    IdentifierLiteral(Span span, std::string s) : name(std::move(s))
+    {
         span = std::move(span);
         kind = ExpressionKind::IDENT;
     }
@@ -205,7 +211,8 @@ struct BinaryOp : Expression
     ExpressionPtr left;
     ExpressionPtr right;
 
-    BinaryOp(Span span, BinaryOpType o, ExpressionPtr l, ExpressionPtr r) : op(o), left(std::move(l)), right(std::move(r)) {
+    BinaryOp(Span span, BinaryOpType o, ExpressionPtr l, ExpressionPtr r) : op(o), left(std::move(l)), right(std::move(r))
+    {
         span = std::move(span);
         kind = ExpressionKind::BINOP;
     }
@@ -217,8 +224,21 @@ struct AssignmentOp : Expression
     ExpressionPtr left;
     ExpressionPtr right;
 
-    AssignmentOp(Span span, AssignmentOpType o, ExpressionPtr l, ExpressionPtr r) : op(o), left(std::move(l)), right(std::move(r)) {
+    AssignmentOp(Span span, AssignmentOpType o, ExpressionPtr l, ExpressionPtr r) : op(o), left(std::move(l)), right(std::move(r))
+    {
         span = std::move(span);
         kind = ExpressionKind::BINOP;
+    }
+};
+
+struct FieldExpr : Expression
+{
+    ExpressionPtr parent;
+    std::string field;
+
+    FieldExpr(Span span, ExpressionPtr parent, std::string field) : parent(std::move(parent)), field(std::move(field))
+    {
+        span = std::move(span);
+        kind = ExpressionKind::FIELD;
     }
 };
