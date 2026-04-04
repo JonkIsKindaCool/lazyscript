@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <format>
 
-enum TokenKind
+enum class TokenKind
 {
     FUNC,
     LET,

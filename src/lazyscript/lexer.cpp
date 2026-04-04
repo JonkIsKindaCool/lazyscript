@@ -1,23 +1,23 @@
 #include "lazyscript/lexer.hpp"
 
 static std::unordered_map<std::string, TokenKind> keywords = {
-    {"func", FUNC}, {"let", LET}, {"const", CONST}, {"if", IF}, {"else", ELSE}, {"while", WHILE}, {"for", FOR}, {"in", IN}, {"return", RETURN}, {"struct", STRUCT},
+    {"func", TokenKind::FUNC}, {"let", TokenKind::LET}, {"const", TokenKind::CONST}, {"if", TokenKind::IF}, {"else", TokenKind::ELSE}, {"while", TokenKind::WHILE}, {"for", TokenKind::FOR}, {"in", TokenKind::IN}, {"return", TokenKind::RETURN}, {"struct", TokenKind::STRUCT},
 
-    {"i32", I32},
-    {"i64", I64},
-    {"f32", F32},
-    {"f64", F64},
-    {"bool", BOOL},
-    {"char", CHAR},
-    {"string", STRING},
-    {"ptr", PTR},
+    {"i32", TokenKind::I32},
+    {"i64", TokenKind::I64},
+    {"f32", TokenKind::F32},
+    {"f64", TokenKind::F64},
+    {"bool", TokenKind::BOOL},
+    {"char", TokenKind::CHAR},
+    {"string", TokenKind::STRING},
+    {"ptr", TokenKind::PTR},
 
-    {"true", TRUE},
-    {"false", FALSE},
-    {"null", NULL_LITERAL}};
+    {"true", TokenKind::TRUE},
+    {"false", TokenKind::FALSE},
+    {"null", TokenKind::NULL_LITERAL}};
 
 Lexer::Lexer(std::string src, std::string name)
-    : src(src), name(name), rawPos(0), line(1), pos(0), hasCached(false) {}
+    : src(std::move(src)), name(std::move(name)), rawPos(0), line(1), pos(0), hasCached(false) {}
 
 Lexer::~Lexer() {}
 
@@ -89,7 +89,7 @@ Token Lexer::identifier()
     if (keywords.contains(text))
         return makeToken(keywords[text], start, pos - 1, text);
 
-    return makeToken(IDENTIFIER, start, pos - 1, text);
+    return makeToken(TokenKind::IDENTIFIER, start, pos - 1, text);
 }
 
 Token Lexer::number()
@@ -112,7 +112,7 @@ Token Lexer::number()
     std::string text = src.substr(start, pos - start);
 
     return makeToken(
-        isFloat ? FLOAT_LITERAL : INTEGER_LITERAL,
+        isFloat ? TokenKind::FLOAT_LITERAL : TokenKind::INTEGER_LITERAL,
         start,
         pos - 1,
         text);
@@ -136,7 +136,7 @@ Token Lexer::stringLiteral()
 
     advance();
 
-    return makeToken(STRING_LITERAL, start, pos - 1, value);
+    return makeToken(TokenKind::STRING_LITERAL, start, pos - 1, value);
 }
 
 Token Lexer::charLiteral()
@@ -151,7 +151,7 @@ Token Lexer::charLiteral()
 
     advance();
 
-    return makeToken(CHAR_LITERAL, start, pos - 1, std::string(1, value));
+    return makeToken(TokenKind::CHAR_LITERAL, start, pos - 1, std::string(1, value));
 }
 
 Token Lexer::lexToken()
@@ -162,7 +162,7 @@ Token Lexer::lexToken()
     char c = current();
 
     if (c == '\0')
-        return makeToken(EOF_TOKEN, pos, pos);
+        return makeToken(TokenKind::EOF_TOKEN, pos, pos);
 
     if (std::isalpha(c) || c == '_')
         return identifier();
@@ -174,42 +174,42 @@ Token Lexer::lexToken()
     {
     case '(':
         advance();
-        return makeToken(LPAREN, start, pos - 1);
+        return makeToken(TokenKind::LPAREN, start, pos - 1);
     case ')':
         advance();
-        return makeToken(RPAREN, start, pos - 1);
+        return makeToken(TokenKind::RPAREN, start, pos - 1);
     case '{':
         advance();
-        return makeToken(LBRACE, start, pos - 1);
+        return makeToken(TokenKind::LBRACE, start, pos - 1);
     case '}':
         advance();
-        return makeToken(RBRACE, start, pos - 1);
+        return makeToken(TokenKind::RBRACE, start, pos - 1);
     case '[':
         advance();
-        return makeToken(LBRACKET, start, pos - 1);
+        return makeToken(TokenKind::LBRACKET, start, pos - 1);
     case ']':
         advance();
-        return makeToken(RBRACKET, start, pos - 1);
+        return makeToken(TokenKind::RBRACKET, start, pos - 1);
 
     case ',':
         advance();
-        return makeToken(COMMA, start, pos - 1);
+        return makeToken(TokenKind::COMMA, start, pos - 1);
     case ':':
         advance();
-        return makeToken(COLON, start, pos - 1);
+        return makeToken(TokenKind::COLON, start, pos - 1);
     case ';':
         advance();
-        return makeToken(SEMICOLON, start, pos - 1);
+        return makeToken(TokenKind::SEMICOLON, start, pos - 1);
 
     case '.':
         if (nextc() == '.')
         {
             advance();
             advance();
-            return makeToken(RANGE, start, pos - 1);
+            return makeToken(TokenKind::RANGE, start, pos - 1);
         }
         advance();
-        return makeToken(DOT, start, pos - 1);
+        return makeToken(TokenKind::DOT, start, pos - 1);
 
     case '"':
         return stringLiteral();
@@ -221,128 +221,128 @@ Token Lexer::lexToken()
         {
             advance();
             advance();
-            return makeToken(PLUS_EQUAL, start, pos - 1);
+            return makeToken(TokenKind::PLUS_EQUAL, start, pos - 1);
         }
         advance();
-        return makeToken(PLUS, start, pos - 1);
+        return makeToken(TokenKind::PLUS, start, pos - 1);
 
     case '-':
         if (nextc() == '>')
         {
             advance();
             advance();
-            return makeToken(ARROW, start, pos - 1);
+            return makeToken(TokenKind::ARROW, start, pos - 1);
         }
         if (nextc() == '=')
         {
             advance();
             advance();
-            return makeToken(MINUS_EQUAL, start, pos - 1);
+            return makeToken(TokenKind::MINUS_EQUAL, start, pos - 1);
         }
         advance();
-        return makeToken(MINUS, start, pos - 1);
+        return makeToken(TokenKind::MINUS, start, pos - 1);
 
     case '*':
         if (nextc() == '=')
         {
             advance();
             advance();
-            return makeToken(STAR_EQUAL, start, pos - 1);
+            return makeToken(TokenKind::STAR_EQUAL, start, pos - 1);
         }
         advance();
-        return makeToken(STAR, start, pos - 1);
+        return makeToken(TokenKind::STAR, start, pos - 1);
 
     case '/':
         if (nextc() == '=')
         {
             advance();
             advance();
-            return makeToken(SLASH_EQUAL, start, pos - 1);
+            return makeToken(TokenKind::SLASH_EQUAL, start, pos - 1);
         }
         advance();
-        return makeToken(SLASH, start, pos - 1);
+        return makeToken(TokenKind::SLASH, start, pos - 1);
 
     case '=':
         if (nextc() == '=')
         {
             advance();
             advance();
-            return makeToken(EQUAL_EQUAL, start, pos - 1);
+            return makeToken(TokenKind::EQUAL_EQUAL, start, pos - 1);
         }
         advance();
-        return makeToken(ASSIGN, start, pos - 1);
+        return makeToken(TokenKind::ASSIGN, start, pos - 1);
 
     case '!':
         if (nextc() == '=')
         {
             advance();
             advance();
-            return makeToken(NOT_EQUAL, start, pos - 1);
+            return makeToken(TokenKind::NOT_EQUAL, start, pos - 1);
         }
         advance();
-        return makeToken(BANG, start, pos - 1);
+        return makeToken(TokenKind::BANG, start, pos - 1);
 
     case '<':
         if (nextc() == '<')
         {
             advance();
             advance();
-            return makeToken(LESS_LESS, start, pos - 1);
+            return makeToken(TokenKind::LESS_LESS, start, pos - 1);
         }
         if (nextc() == '=')
         {
             advance();
             advance();
-            return makeToken(LESS_EQUAL, start, pos - 1);
+            return makeToken(TokenKind::LESS_EQUAL, start, pos - 1);
         }
         advance();
-        return makeToken(LESS, start, pos - 1);
+        return makeToken(TokenKind::LESS, start, pos - 1);
 
     case '>':
         if (nextc() == '>')
         {
             advance();
             advance();
-            return makeToken(GREATER_GREATER, start, pos - 1);
+            return makeToken(TokenKind::GREATER_GREATER, start, pos - 1);
         }
         if (nextc() == '=')
         {
             advance();
             advance();
-            return makeToken(GREATER_EQUAL, start, pos - 1);
+            return makeToken(TokenKind::GREATER_EQUAL, start, pos - 1);
         }
         advance();
-        return makeToken(GREATER, start, pos - 1);
+        return makeToken(TokenKind::GREATER, start, pos - 1);
 
     case '&':
         if (nextc() == '&')
         {
             advance();
             advance();
-            return makeToken(AMPERSAND_AMPERSAND, start, pos - 1);
+            return makeToken(TokenKind::AMPERSAND_AMPERSAND, start, pos - 1);
         }
         advance();
-        return makeToken(AMPERSAND, start, pos - 1);
+        return makeToken(TokenKind::AMPERSAND, start, pos - 1);
 
     case '|':
         if (nextc() == '|')
         {
             advance();
             advance();
-            return makeToken(PIPE_PIPE, start, pos - 1);
+            return makeToken(TokenKind::PIPE_PIPE, start, pos - 1);
         }
         advance();
-        return makeToken(PIPE, start, pos - 1);
+        return makeToken(TokenKind::PIPE, start, pos - 1);
 
     case '^':
         advance();
-        return makeToken(CARET, start, pos - 1);
+        return makeToken(TokenKind::CARET, start, pos - 1);
     case '~':
         advance();
-        return makeToken(TILDE, start, pos - 1);
+        return makeToken(TokenKind::TILDE, start, pos - 1);
     case '%':
         advance();
-        return makeToken(PERCENT, start, pos - 1);
+        return makeToken(TokenKind::PERCENT, start, pos - 1);
     }
 
     throw std::runtime_error(

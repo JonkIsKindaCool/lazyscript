@@ -1,37 +1,20 @@
 #pragma once
 
-#include <memory>
-#include <iostream>
+#include "lazyscript/ast.hpp"
 
-struct Declaration
+class Parser
 {
-    virtual ~Declaration() = default;
-};
-using DeclarationPtr = std::unique_ptr<Declaration>;
-
-struct FunctionDeclaration : Declaration
-{
-    std::string name;
-
-    FunctionDeclaration(std::string n) : name(n) {}
+private:
+    std::string src;
+public:
+    Parser(/* args */);
+    ~Parser();
 };
 
-struct Statement
+Parser::Parser(/* args */)
 {
-    virtual ~Statement() = default;
-};
+}
 
-using StatementPtr = std::unique_ptr<Statement>;
-
-struct VarStatement : Statement
+Parser::~Parser()
 {
-    std::string name;
-};
-
-struct Expression
-{
-    virtual ~Expression() = default;
-};
-
-using ExpressionPtr = std::unique_ptr<Expression>;
-
+}
