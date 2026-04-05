@@ -242,3 +242,15 @@ struct FieldExpr : Expression
         kind = ExpressionKind::FIELD;
     }
 };
+
+struct CallExpr : Expression
+{
+    ExpressionPtr parent;
+    std::vector<ExpressionPtr> args;
+
+    CallExpr(Span span, ExpressionPtr parent, std::vector<ExpressionPtr> args) : parent(std::move(parent)), args(std::move(args))
+    {
+        span = std::move(span);
+        kind = ExpressionKind::CALL;
+    }
+};

@@ -105,8 +105,6 @@ ExpressionPtr Parser::parseExpression()
 
 ExpressionPtr Parser::parseAssignment()
 {
-	TRACE("EXPR: parseAssignment");
-
 	auto left = parseOR();
 
 	Token tok = peek();
@@ -138,7 +136,6 @@ ExpressionPtr Parser::parseAssignment()
 
 	if (!isAssign)
 	{
-		TRACE("EXPR: no assignment");
 		return left;
 	}
 
@@ -157,8 +154,6 @@ ExpressionPtr Parser::parseAssignment()
 
 ExpressionPtr Parser::parseOR()
 {
-	TRACE("EXPR: parseOR");
-
 	auto left = parseAND();
 
 	while (true)
@@ -180,8 +175,6 @@ ExpressionPtr Parser::parseOR()
 
 ExpressionPtr Parser::parseAND()
 {
-	TRACE("EXPR: parseAND");
-
 	auto left = parseBitwise_OR();
 
 	while (true)
@@ -203,8 +196,6 @@ ExpressionPtr Parser::parseAND()
 
 ExpressionPtr Parser::parseBitwise_OR()
 {
-	TRACE("EXPR: parseBitwise_OR");
-
 	auto left = parseBitwise_XOR();
 
 	while (true)
@@ -226,8 +217,6 @@ ExpressionPtr Parser::parseBitwise_OR()
 
 ExpressionPtr Parser::parseBitwise_XOR()
 {
-	TRACE("EXPR: parseBitwise_XOR");
-
 	auto left = parseBitwise_AND();
 
 	while (true)
@@ -249,8 +238,6 @@ ExpressionPtr Parser::parseBitwise_XOR()
 
 ExpressionPtr Parser::parseBitwise_AND()
 {
-	TRACE("EXPR: parseBitwise_AND");
-
 	auto left = parseEquality();
 
 	while (true)
@@ -272,8 +259,6 @@ ExpressionPtr Parser::parseBitwise_AND()
 
 ExpressionPtr Parser::parseEquality()
 {
-	TRACE("EXPR: parseEquality");
-
 	auto left = parseComparison();
 
 	while (true)
@@ -301,8 +286,6 @@ ExpressionPtr Parser::parseEquality()
 
 ExpressionPtr Parser::parseComparison()
 {
-	TRACE("EXPR: parseComparison");
-
 	auto left = parseShift();
 
 	while (true)
@@ -338,8 +321,6 @@ ExpressionPtr Parser::parseComparison()
 
 ExpressionPtr Parser::parseShift()
 {
-	TRACE("EXPR: parseShift");
-
 	auto left = parseAdditive();
 
 	while (true)
@@ -365,8 +346,6 @@ ExpressionPtr Parser::parseShift()
 
 ExpressionPtr Parser::parseAdditive()
 {
-	TRACE("EXPR: parseAdditive");
-
 	auto left = parseMultiplicative();
 
 	while (true)
@@ -392,8 +371,6 @@ ExpressionPtr Parser::parseAdditive()
 
 ExpressionPtr Parser::parseMultiplicative()
 {
-	TRACE("EXPR: parseMultiplicative");
-
 	auto left = parsePrimitive();
 
 	while (true)
@@ -461,6 +438,23 @@ ExpressionPtr Parser::parsePostfix(ExpressionPtr expr){
 		TRACE("Got field: " + field);
 
 		return std::move(parsePostfix(std::make_unique<FieldExpr>(tok.span, std::move(expr), std::move(field))));
+	} else if (tok.kind == TokenKind::LPAREN){
+		advance();
+		std::vector<ExpressionPtr> args;
+
+		while (!maybe(TokenKind::RPAREN))
+		{
+			args.push_back(std::move(parseExpression()));
+
+			if (!maybe(TokenKind::COMMA)){
+				expect(TokenKind::RPAREN);
+				break;
+			}
+		}
+
+		TRACE(std::format("CALLING, AMOUNT OF ARGUMENTS {}", args.size()));
+		
+		return std::move(parsePostfix(std::make_unique<CallExpr>(tok.span, std::move(expr), std::move(args))));
 	}
 
 	return expr;
