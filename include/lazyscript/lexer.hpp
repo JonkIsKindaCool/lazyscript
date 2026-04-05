@@ -40,6 +40,7 @@ enum class TokenKind
     COLON,
     SEMICOLON,
     DOT,
+    QUESTION,
     ARROW,
     RANGE,
 

@@ -1,15 +1,15 @@
 #include "lazyscript/lexer.hpp"
 
 static std::unordered_map<std::string, TokenKind> keywords = {
-    {"func", TokenKind::FUNC}, 
-    {"let", TokenKind::LET}, 
-    {"const", TokenKind::CONST}, 
-    {"if", TokenKind::IF}, 
-    {"else", TokenKind::ELSE}, 
-    {"while", TokenKind::WHILE}, 
-    {"for", TokenKind::FOR}, 
-    {"in", TokenKind::IN}, 
-    {"return", TokenKind::RETURN}, 
+    {"func", TokenKind::FUNC},
+    {"let", TokenKind::LET},
+    {"const", TokenKind::CONST},
+    {"if", TokenKind::IF},
+    {"else", TokenKind::ELSE},
+    {"while", TokenKind::WHILE},
+    {"for", TokenKind::FOR},
+    {"in", TokenKind::IN},
+    {"return", TokenKind::RETURN},
     {"struct", TokenKind::STRUCT},
 
     {"true", TokenKind::TRUE},
@@ -200,7 +200,9 @@ Token Lexer::lexToken()
     case ';':
         advance();
         return makeToken(TokenKind::SEMICOLON, start, pos - 1);
-
+    case '?':
+        advance();
+        return makeToken(TokenKind::QUESTION, start, pos - 1);
     case '.':
         if (nextc() == '.')
         {

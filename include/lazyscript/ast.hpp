@@ -41,10 +41,12 @@ enum class ExpressionKind
     FLOAT,
     STRING,
     IDENT,
+    ASSIGNMENT,
     BINOP,
     UNOP,
     CALL,
-    FIELD
+    FIELD,
+    ACCESS
 };
 
 struct Expression
@@ -86,8 +88,20 @@ struct FunctionDeclaration : Declaration
     std::string name;
     std::vector<FunctionArgumentPtr> args;
     std::vector<StatementPtr> body;
+    VariableTypePtr type;
 
-    FunctionDeclaration(std::string n, std::vector<FunctionArgumentPtr> args, std::vector<StatementPtr> body) : name(std::move(n)), args(std::move(args)), body(std::move(body)) {}
+    FunctionDeclaration(std::string n, std::vector<FunctionArgumentPtr> args, std::vector<StatementPtr> body, VariableTypePtr type) : name(std::move(n)), args(std::move(args)), body(std::move(body)), type(std::move(type)) {}
+};
+
+struct VarDecl : Declaration
+{
+    std::string name;
+    VariableTypePtr type;
+    ExpressionPtr expr;
+
+    bool constant;
+
+    VarDecl(std::string s, VariableTypePtr type, ExpressionPtr val, bool constant) : name(std::move(s)), expr(std::move(val)), type(std::move(type)), constant(constant) {}
 };
 
 /*
@@ -97,9 +111,12 @@ struct FunctionDeclaration : Declaration
 struct VarStmt : Statement
 {
     std::string name;
+    VariableTypePtr type;
     ExpressionPtr expr;
 
-    VarStmt(std::string s, ExpressionPtr val) : name(std::move(s)), expr(std::move(val)) {}
+    bool constant;
+
+    VarStmt(std::string s, VariableTypePtr type, ExpressionPtr val, bool constant) : name(std::move(s)), expr(std::move(val)), type(std::move(type)), constant(constant) {}
 };
 
 struct ExpressionStmt : Statement
@@ -167,8 +184,8 @@ struct IntExpression : Expression
 
     IntExpression(Span span, int n) : num(std::move(n))
     {
-        span = std::move(span);
-        kind = ExpressionKind::INTEGER;
+        this->span = std::move(span);
+        this->kind = ExpressionKind::INTEGER;
     }
 };
 
@@ -178,8 +195,8 @@ struct FloatExpression : Expression
 
     FloatExpression(Span span, float n) : num(std::move(n))
     {
-        span = std::move(span);
-        kind = ExpressionKind::FLOAT;
+        this->span = std::move(span);
+        this->kind = ExpressionKind::FLOAT;
     }
 };
 
@@ -189,8 +206,8 @@ struct StringExpression : Expression
 
     StringExpression(Span span, std::string s) : val(std::move(s))
     {
-        span = std::move(span);
-        kind = ExpressionKind::STRING;
+        this->span = std::move(span);
+        this->kind = ExpressionKind::STRING;
     }
 };
 
@@ -200,8 +217,8 @@ struct IdentifierLiteral : Expression
 
     IdentifierLiteral(Span span, std::string s) : name(std::move(s))
     {
-        span = std::move(span);
-        kind = ExpressionKind::IDENT;
+        this->span = std::move(span);
+        this->kind = ExpressionKind::IDENT;
     }
 };
 
@@ -213,8 +230,8 @@ struct BinaryOp : Expression
 
     BinaryOp(Span span, BinaryOpType o, ExpressionPtr l, ExpressionPtr r) : op(o), left(std::move(l)), right(std::move(r))
     {
-        span = std::move(span);
-        kind = ExpressionKind::BINOP;
+        this->span = std::move(span);
+        this->kind = ExpressionKind::BINOP;
     }
 };
 
@@ -226,8 +243,8 @@ struct AssignmentOp : Expression
 
     AssignmentOp(Span span, AssignmentOpType o, ExpressionPtr l, ExpressionPtr r) : op(o), left(std::move(l)), right(std::move(r))
     {
-        span = std::move(span);
-        kind = ExpressionKind::BINOP;
+        this->span = std::move(span);
+        this->kind = ExpressionKind::ASSIGNMENT;
     }
 };
 
@@ -238,8 +255,8 @@ struct FieldExpr : Expression
 
     FieldExpr(Span span, ExpressionPtr parent, std::string field) : parent(std::move(parent)), field(std::move(field))
     {
-        span = std::move(span);
-        kind = ExpressionKind::FIELD;
+        this->span = std::move(span);
+        this->kind = ExpressionKind::FIELD;
     }
 };
 
@@ -250,7 +267,19 @@ struct CallExpr : Expression
 
     CallExpr(Span span, ExpressionPtr parent, std::vector<ExpressionPtr> args) : parent(std::move(parent)), args(std::move(args))
     {
-        span = std::move(span);
-        kind = ExpressionKind::CALL;
+        this->span = std::move(span);
+        this->kind = ExpressionKind::CALL;
+    }
+};
+
+struct AccessExpr : Expression
+{
+    ExpressionPtr parent;
+    ExpressionPtr index;
+
+    AccessExpr(Span span, ExpressionPtr parent, ExpressionPtr index) : parent(std::move(parent)), index(std::move(index))
+    {
+        this->span = std::move(span);
+        this->kind = ExpressionKind::ACCESS;
     }
 };

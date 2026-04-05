@@ -38,7 +38,7 @@ DeclarationPtr Parser::parseDeclaration()
 		{
 			bool optional = false;
 
-			if (maybe(TokenKind::COLON))
+			if (maybe(TokenKind::QUESTION))
 			{
 				optional = true;
 			}
@@ -61,6 +61,12 @@ DeclarationPtr Parser::parseDeclaration()
 			}
 		}
 
+		VariableTypePtr type = NULL;
+
+		if (maybe(TokenKind::COLON)){
+			type = parseType();
+		}
+
 		TRACE(std::format("Total Arguments: {} ", args.size()));
 
 		expect(TokenKind::LBRACE);
@@ -81,11 +87,30 @@ DeclarationPtr Parser::parseDeclaration()
 		TRACE("END OF FUNCTION DECLARATION");
 		NEWLINE();
 
-		return std::make_unique<FunctionDeclaration>(std::move(name), std::move(args), std::move(body));
+		return std::make_unique<FunctionDeclaration>(std::move(name), std::move(args), std::move(body), std::move(type));
+	}
+	else if (tok.kind == TokenKind::LET || tok.kind == TokenKind::CONST)
+	{
+		bool constant = tok.kind == TokenKind::CONST;
+		advance();
+		std::string name = get_ident();
+
+		TRACE(std::format("DECLARATION: Variable {}", name));
+
+		expect(TokenKind::COLON);
+
+		VariableTypePtr type = std::move(parseType());
+		ExpressionPtr val = NULL;
+
+		expect(TokenKind::ASSIGN);
+		val = std::move(parseExpression());
+
+		maybe(TokenKind::SEMICOLON);
+
+		return std::make_unique<VarDecl>(std::move(name), std::move(type), std::move(val), constant);
 	}
 	else
 	{
-
 		unexpected(tok);
 		return NULL;
 	}
@@ -93,6 +118,29 @@ DeclarationPtr Parser::parseDeclaration()
 
 StatementPtr Parser::parseStatement()
 {
+	Token tok = peek();
+
+	if (tok.kind == TokenKind::LET || tok.kind == TokenKind::CONST)
+	{
+		bool constant = tok.kind == TokenKind::CONST;
+		advance();
+		std::string name = get_ident();
+
+		TRACE(std::format("STATEMENT: Variable {}", name));
+
+		expect(TokenKind::COLON);
+
+		VariableTypePtr type = std::move(parseType());
+		ExpressionPtr val = NULL;
+
+		expect(TokenKind::ASSIGN);
+		val = std::move(parseExpression());
+
+		maybe(TokenKind::SEMICOLON);
+
+		return std::make_unique<VarStmt>(std::move(name), std::move(type), std::move(val), constant);
+	}
+
 	ExpressionPtr expr = parseExpression();
 	maybe(TokenKind::SEMICOLON);
 	return std::make_unique<ExpressionStmt>(std::move(expr));
@@ -143,7 +191,7 @@ ExpressionPtr Parser::parseAssignment()
 
 	TRACE("EXPR: assignment operator");
 
-	auto right = parseAssignment(); 
+	auto right = parseAssignment();
 
 	return std::make_unique<AssignmentOp>(
 		tok.span,
@@ -428,17 +476,21 @@ ExpressionPtr Parser::parsePrimitive()
 	return NULL;
 }
 
-ExpressionPtr Parser::parsePostfix(ExpressionPtr expr){
+ExpressionPtr Parser::parsePostfix(ExpressionPtr expr)
+{
 	Token tok = peek();
 
-	if (tok.kind == TokenKind::DOT){
+	if (tok.kind == TokenKind::DOT)
+	{
 		advance();
 		std::string field = get_ident();
 
 		TRACE("Got field: " + field);
 
-		return std::move(parsePostfix(std::make_unique<FieldExpr>(tok.span, std::move(expr), std::move(field))));
-	} else if (tok.kind == TokenKind::LPAREN){
+		return std::move(parsePostfix(std::make_unique<FieldExpr>(std::move(tok.span), std::move(expr), std::move(field))));
+	}
+	else if (tok.kind == TokenKind::LPAREN)
+	{
 		advance();
 		std::vector<ExpressionPtr> args;
 
@@ -446,15 +498,26 @@ ExpressionPtr Parser::parsePostfix(ExpressionPtr expr){
 		{
 			args.push_back(std::move(parseExpression()));
 
-			if (!maybe(TokenKind::COMMA)){
+			if (!maybe(TokenKind::COMMA))
+			{
 				expect(TokenKind::RPAREN);
 				break;
 			}
 		}
 
 		TRACE(std::format("CALLING, AMOUNT OF ARGUMENTS {}", args.size()));
-		
-		return std::move(parsePostfix(std::make_unique<CallExpr>(tok.span, std::move(expr), std::move(args))));
+
+		return std::move(parsePostfix(std::make_unique<CallExpr>(std::move(tok.span), std::move(expr), std::move(args))));
+	}
+	else if (tok.kind == TokenKind::LBRACKET)
+	{
+		advance();
+		ExpressionPtr index = std::move(parseExpression());
+		expect(TokenKind::RBRACKET);
+
+		TRACE(std::format("INDEX ACCESS"));
+
+		return std::move(parsePostfix(std::make_unique<AccessExpr>(std::move(tok.span), std::move(expr), std::move(index))));
 	}
 
 	return expr;
