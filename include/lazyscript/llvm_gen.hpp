@@ -15,7 +15,21 @@ class LLVM_Gen
 {
 private:
     std::vector<DeclarationPtr> body;
+
+    void generate_decl(const Declaration &decl);
+    Type *getType(const std::unique_ptr<VariableType> &t);
+
 public:
-    LLVM_Gen();
+    static LLVMContext context;
+
+    std::string name;
+
+    Module module;
+    llvm::IRBuilder<> builder;
+
+public:
+    LLVM_Gen(std::string name, std::vector<DeclarationPtr> &&body);
     ~LLVM_Gen();
+
+    void generate();
 };

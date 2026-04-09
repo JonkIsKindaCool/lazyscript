@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 #include <iostream>
 #include "lazyscript/lexer.hpp"
 
@@ -11,10 +12,13 @@ enum class DeclarationKind
     STRUCT,
     ENUM,
     TYPE,
+    VAR,
+    CONST
 };
 
 struct Declaration
 {
+    DeclarationKind kind;
     virtual ~Declaration() = default;
 };
 using DeclarationPtr = std::unique_ptr<Declaration>;
@@ -90,7 +94,10 @@ struct FunctionDeclaration : Declaration
     std::vector<StatementPtr> body;
     VariableTypePtr type;
 
-    FunctionDeclaration(std::string n, std::vector<FunctionArgumentPtr> args, std::vector<StatementPtr> body, VariableTypePtr type) : name(std::move(n)), args(std::move(args)), body(std::move(body)), type(std::move(type)) {}
+    FunctionDeclaration(std::string n, std::vector<FunctionArgumentPtr> args, std::vector<StatementPtr> body, VariableTypePtr type) : name(std::move(n)), args(std::move(args)), body(std::move(body)), type(std::move(type))
+    {
+        this->kind = DeclarationKind::FUNCTION;
+    }
 };
 
 struct VarDecl : Declaration
@@ -101,7 +108,17 @@ struct VarDecl : Declaration
 
     bool constant;
 
-    VarDecl(std::string s, VariableTypePtr type, ExpressionPtr val, bool constant) : name(std::move(s)), expr(std::move(val)), type(std::move(type)), constant(constant) {}
+    VarDecl(std::string s, VariableTypePtr type, ExpressionPtr val, bool constant) : name(std::move(s)), expr(std::move(val)), type(std::move(type)), constant(constant)
+    {
+        if (constant)
+        {
+            this->kind = DeclarationKind::CONST;
+        }
+        else
+        {
+            this->kind = DeclarationKind::VAR;
+        }
+    }
 };
 
 /*

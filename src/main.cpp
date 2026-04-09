@@ -29,7 +29,11 @@ void compile_project(nlohmann::json data)
     try
     {
         Parser parser(read_file(main), entry);
-        parser.parse();
+        std::vector<DeclarationPtr> decls = parser.parse();
+
+        LLVM_Gen generator(std::move(entry), std::move(decls));
+        generator.generate();
+        
     } catch (std::runtime_error err){
         std::cout << err.what() << std::endl;
         exit(1);
